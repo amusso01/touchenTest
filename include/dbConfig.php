@@ -1,6 +1,8 @@
 <?php
 
-/* --- Internal credential to our database (the TT database in our case) --- */
+/**
+ * Internal credential to our database (the TT database in our case)
+ */
 
 $driver = 'mysql';
 $dbName = 'tt';
@@ -16,7 +18,9 @@ $options = [
 ];
 
 
-/* --- Connection to our DB, instance name: $pdoTT --- */
+/**
+ * Connection to our DB, instance name: $pdoTT
+ */
 
 try {
 	$pdoTT = new PDO($dsn, $user, $pass, $options);
@@ -25,8 +29,10 @@ try {
 }
 
 
-/* --- Credential for the unknown source DB
-	Uncomment and fill the variables with value different from Internal DB --- */
+/**
+ * Credential for the unknown source DB
+ * If need uncomment and fill the variables with value different from Internal DB
+ */
 
 //$driver = '';
 $dbName = 'source';
@@ -38,7 +44,9 @@ $dbName = 'source';
 $dsn = "$driver:host=$host;dbname=$dbName;charset=$charset";
 
 
-/* --- Connection to external source DB , instance name: $pdoSource --- */
+/**
+ * Connection to external source DB , instance name: $pdoSource
+ */
 
 try {
 	$pdoSource = new PDO($dsn, $user, $pass, $options);

@@ -10,6 +10,8 @@
 <body>
 <?php
 include 'bootstrap.php';
+$sentence = '';
+echo cleanSpace($sentence);
 ?>
 </body>
 </html>
