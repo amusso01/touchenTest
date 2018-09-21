@@ -31,17 +31,17 @@ try {
 
 /**
  * Credential for the unknown source DB
- * If need uncomment and fill the variables with value different from Internal DB
+ * if need different options for this connection modify $options[] array
  */
 
-//$driver = '';
-$dbName = 'source';
-//$host = '';
-//$user = '';
-//$pass = '';
-//$charset = '';
+$sourceDriver = 'mysql';
+$sourceDbName = 'source';
+$sourceHost = 'localhost';
+$sourceUser = 'root';
+$sourcePass = '';
+$sourceCharset = 'utf8mb4';
 
-$dsn = "$driver:host=$host;dbname=$dbName;charset=$charset";
+$dsn = "$sourceDriver:host=$sourceHost;dbname=$sourceDbName;charset=$sourceCharset";
 
 
 /**
@@ -49,7 +49,7 @@ $dsn = "$driver:host=$host;dbname=$dbName;charset=$charset";
  */
 
 try {
-	$pdoSource = new PDO($dsn, $user, $pass, $options);
+	$pdoSource = new PDO($dsn, $sourceUser, $sourcePass, $options);
 } catch (PDOException $i) {
 	throw new PDOException($i->getMessage(), (int)$i->getCode());
 }

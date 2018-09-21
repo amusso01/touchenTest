@@ -1,46 +1,67 @@
 <?php
 
-//$user = $pdoSource->prepare($select);
-//$user->execute();
-//while ($row = $user ->fetch()){
-//	var_dump($row);
-//}
-
-/**
- * Run php function trim() on passed parameter
- *
- * @param string or array $sentence
- *
- * @return string or array of string
- */
-//function trimer($sentence){
-//	if (is_array($sentence)){
-//		foreach ($sentence as $item){
-//			$item = trim($item);
-//		}
-//		return $sentence;
-//	}else{
-//		return trim($sentence);
-//	}
-//}
-
 /**
  * Clean the passed parameter from white spaces at the begin/end
  * if sentence passed leave just one white space in between the words
+ * capitalize first letter
  *
  * @param $string
  *
  * @return string
  */
-function cleanSpace($string){
-	if (stripos($string,' ')){
+function formatEntry($string){
+	$string = strtolower($string);
+	$string = trim($string);
+	if (stripos($string," ")){
 		$word = explode(' ', $string);
 		foreach ($word as $key=>$value){
-			$word[$key] = trim($value);
+			if (trim($value) === ''){
+				unset($word[$key]);
+			}else{
+				$word[$key] = ucfirst($value);
+			}
 		}
 		$newString = implode(' ', $word);
 	}else{
-		$newString = trim($string);
+		$newString = ucfirst($string);
 	}
 	return $newString;
 }
+
+/**
+ * @param $string date in format mm/dd/YYYY
+ *
+ * @return string date format YYYY/mm/dd
+ */
+function formatDate($string){
+	$date = new DateTime($string);
+	return $date->format('Y-m-d');
+}
+
+
+/**
+ * @param $address string coming from ADDRESS.address
+ *
+ * @return array associative, the index array map to tt_address column name
+ */
+function formatAddress($address){
+	$addressLines = explode(',', $address);
+	$splitAddress['town_city'] = formatEntry(array_pop($addressLines));
+	$i=1;
+	foreach ($addressLines as $value) {
+		$splitAddress[ 'address_line_' . $i ] = formatEntry($value);
+		$i++;
+	}
+	return $splitAddress;
+}
+
+
+function formatPhone($number){
+	$numberArray = explode(')',$number);
+	foreach ($numberArray as $value){
+		$phone[] = preg_replace('/(\s+)|(\()/','',$value);
+	}
+	return $phone;
+}
+
+
