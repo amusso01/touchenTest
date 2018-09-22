@@ -24,6 +24,7 @@ function import($pdoSource, $pdoTT){
 			$tableName[] = $item;
 		}
 	}
+	$tables->closeCursor();
 
     /**
      * Get all the value from each table as an associative array
@@ -115,46 +116,46 @@ function import($pdoSource, $pdoTT){
             }
         }
     }
-
+	$stmt->closeCursor();
 	/**
 	 *  ----IMPORT----
 	 * Populate tt_user table
 	 */
-//     foreach ($tt_userArray as $ref=>$entry){
-//        $query = 'INSERT INTO tt_user (first_name, last_name, dob,';
-//     	$values='';
-//     	$values .= '\''.$tt_userArray[$ref]['name'].'\',\''.$tt_userArray[$ref]['surname'].'\',\''.$tt_userArray[$ref]['dob'].'\'';
-//     	if(array_key_exists('status',$tt_userArray[$ref])){
-//     		$query .= 'status,reference) VALUES (';
-//     		$values .= ',\''.$tt_userArray[$ref]['status'].'\',\''.$ref.'\')';
-//        }else{
-//     		$query .= 'reference) VALUES (';
-//     		$values .= ',\''.$ref.'\')';
-//        }
-//		$sql = $pdoTT->prepare($query.$values);
-//     	$sql->execute();
-//     }
+     foreach ($tt_userArray as $ref=>$entry){
+        $query = 'INSERT INTO tt_user (first_name, last_name, dob,';
+     	$values = '\''.$tt_userArray[$ref]['name'].'\',\''.$tt_userArray[$ref]['surname'].'\',\''.$tt_userArray[$ref]['dob'].'\'';
+     	if(array_key_exists('status',$tt_userArray[$ref])){
+     		$query .= 'status,reference) VALUES (';
+     		$values .= ',\''.$tt_userArray[$ref]['status'].'\',\''.$ref.'\')';
+        }else{
+     		$query .= 'reference) VALUES (';
+     		$values .= ',\''.$ref.'\')';
+        }
+		$sql = $pdoTT->prepare($query.$values);
+     	$sql->execute();
+		$sql->closeCursor();
+     }
 
 	/**
 	 * Populate tt_email table
 	 */
-//	foreach ($tt_emailArray as $key => $value){
-//		//retrieve the corresponding user_id from tt_user table
-//		$reference = $tt_emailArray[$key]['reference'];
-//		$stmt = $pdoTT->prepare('SELECT id FROM tt_user WHERE reference = ?');
-//		$stmt->execute([$reference]);
-//		//prepare the query to insert in the tt_email table and bind parameters
-//		$query = 'INSERT INTO tt_email (user_id, email, type) VALUES (:id, :mail, :type)';
-//		$user_id = $stmt->fetchColumn();
-//		$email = $tt_emailArray[$key]['email'];
-//		$type = $tt_emailArray[$key]['type'];
-//		$sql = $pdoTT->prepare($query);
-//		$sql->bindParam(':id', $user_id);
-//		$sql->bindParam(':mail', $email);
-//		$sql->bindParam(':type', $type);
-//		//execute query foreach entity
-//		$sql->execute();
-//	}
+	foreach ($tt_emailArray as $key => $value){
+		//retrieve the corresponding user_id from tt_user table
+		$reference = $tt_emailArray[$key]['reference'];
+		$stmt = $pdoTT->prepare('SELECT id FROM tt_user WHERE reference = ?');
+		$stmt->execute([$reference]);
+		//prepare the query to insert in the tt_email table and bind parameters
+		$query = 'INSERT INTO tt_email (user_id, email, type) VALUES (:id, :mail, :type)';
+		$user_id = $stmt->fetchColumn();
+		$email = $tt_emailArray[$key]['email'];
+		$type = $tt_emailArray[$key]['type'];
+		$sql = $pdoTT->prepare($query);
+		$sql->bindParam(':id', $user_id);
+		$sql->bindParam(':mail', $email);
+		$sql->bindParam(':type', $type);
+		//execute query foreach entity
+		$sql->execute();
+	}
 
 	/**
 	 * Populate tt_phone table
@@ -179,6 +180,84 @@ function import($pdoSource, $pdoTT){
 		$sql->execute();
 	}
 
+	/**
+	 * Populate tt_country table
+	 */
+	foreach ($tt_countryArray as $value){
+		$query = 'INSERT INTO tt_country (country) VALUES (?)';
+		$sql = $pdoTT->prepare($query);
+		$sql->execute([$value]);
+	}
+
+	foreach ($tt_addressArray as $key => $value){
+		//retrieve the user_id from tt_user table using the reference
+		$reference = $key;
+		$stmt = $pdoTT->prepare('SELECT id FROM tt_user WHERE reference = ?');
+		$stmt->execute([$reference]);
+		$user_id = $stmt->fetchColumn();
+		//retrieve country_id from tt_country
+		$stmt->closeCursor();
+		$country = $tt_addressArray[$key]['country'];
+		$stmt = $pdoTT->prepare('SELECT id FROM tt_country WHERE country = ?');
+		$stmt->execute([$country]);
+		$country_id =  $stmt->fetchColumn();
+		//create query to insert entry in the tt_address db
+		$query = 'INSERT INTO tt_address (user_id';
+		$values = 'VALUES (:user_id';
+			foreach ($value as $column => $item){
+				switch ($column){
+					case 'address_line_1':
+						$address_line_1 = $item;
+						$query  .= ', address_line_1';
+						$values .= ', :address_line_1';
+						break;
+					case 'address_line_2':
+						$address_line_2 = $item;
+						$query  .= ', address_line_2';
+						$values .= ', :address_line_2';
+						break;
+					case 'address_line_3':
+						$address_line_3 = $item;
+						$query  .= ', address_line_3';
+						$values .= ', address_line_3';
+						break;
+					case 'town_city':
+						$town_city = $item;
+						$query  .= ', town_city';
+						$values .= ', :town_city';
+						break;
+					case 'postcode':
+						$postcode = $item;
+						$query  .= ', postcode';
+						$values .= ', :postcode';
+						break;
+					case 'country':
+						if ($country_id){
+						$query  .= ', country_id';
+						$values .= ', :country_id';
+						}
+						break;
+				}
+			}
+			$query .= ') ';
+			$values .= ')';
+			$finalQuery = $query.$values;
+			$sql = $pdoTT->prepare($finalQuery);
+			$sql->bindParam(':user_id', $user_id);
+			$sql->bindParam(':address_line_1', $address_line_1);
+			if (array_key_exists('address_line_2',$tt_addressArray[$key])){
+				$sql->bindParam(':address_line_2', $address_line_2);
+			}
+			if (array_key_exists('address_line_3', $tt_addressArray[$key])){
+				$sql->bindParam(':address_line_3', $address_line_3);
+			}
+			$sql->bindParam(':town_city', $town_city);
+			$sql->bindParam(':postcode', $postcode);
+			if ($country_id){
+				$sql->bindParam(':country_id', $country_id);
+			}
+			$sql->execute();
+	}
 
 //    var_dump($tt_userArray);
 //    var_dump($tt_countryArray);

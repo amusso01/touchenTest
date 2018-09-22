@@ -55,7 +55,11 @@ function formatAddress($address){
 	return $splitAddress;
 }
 
-
+/**
+ * @param $number
+ *
+ * @return array
+ */
 function formatPhone($number){
 	$numberArray = explode(')',$number);
 	foreach ($numberArray as $value){
@@ -63,5 +67,3 @@ function formatPhone($number){
 	}
 	return $phone;
 }
-
-
