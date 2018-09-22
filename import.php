@@ -7,7 +7,7 @@ include 'bootstrap.php';
 function import($pdoSource, $pdoTT){
 
 	/**
-	 * Declare all the final array for TT database table
+	 * Declare all the arrays where I will store entity for TT database table
 	 */
 	$tt_emailArray = array();
 	$tt_phoneArray = array();
@@ -131,23 +131,59 @@ function import($pdoSource, $pdoTT){
 //     		$query .= 'reference) VALUES (';
 //     		$values .= ',\''.$ref.'\')';
 //        }
-//
 //		$sql = $pdoTT->prepare($query.$values);
 //     	$sql->execute();
 //     }
 
-	foreach ($tt_emailArray as $key => $value){
-		$reference=$tt_emailArray[$key]['reference'];
-		$id = $pdoTT->prepare('SELECT id FROM tt_user WHERE reference = ?')->execute([$tt_emailArray[$key]['reference']]);
-		var_dump($id->fetchAll);
+	/**
+	 * Populate tt_email table
+	 */
+//	foreach ($tt_emailArray as $key => $value){
+//		//retrieve the corresponding user_id from tt_user table
+//		$reference = $tt_emailArray[$key]['reference'];
+//		$stmt = $pdoTT->prepare('SELECT id FROM tt_user WHERE reference = ?');
+//		$stmt->execute([$reference]);
+//		//prepare the query to insert in the tt_email table and bind parameters
+//		$query = 'INSERT INTO tt_email (user_id, email, type) VALUES (:id, :mail, :type)';
+//		$user_id = $stmt->fetchColumn();
+//		$email = $tt_emailArray[$key]['email'];
+//		$type = $tt_emailArray[$key]['type'];
+//		$sql = $pdoTT->prepare($query);
+//		$sql->bindParam(':id', $user_id);
+//		$sql->bindParam(':mail', $email);
+//		$sql->bindParam(':type', $type);
+//		//execute query foreach entity
+//		$sql->execute();
+//	}
 
+	/**
+	 * Populate tt_phone table
+	 */
+	foreach ($tt_phoneArray as $key => $value){
+		//retrieve the corresponding user_id from tt_user table
+		$reference = $tt_phoneArray[$key]['reference'];
+		$stmt = $pdoTT->prepare('SELECT id FROM tt_user WHERE reference = ?');
+		$stmt->execute([$reference]);
+		//prepare the query to insert in the tt_email table and bind parameters
+		$query = 'INSERT INTO tt_phone (user_id, country, number, type) VALUES (:id, :country, :number, :type)';
+		$user_id = $stmt->fetchColumn();
+		$country = $tt_phoneArray[$key]['country'];
+		$number = $tt_phoneArray[$key]['number'];
+		$type = $tt_phoneArray[$key]['type'];
+		$sql = $pdoTT->prepare($query);
+		$sql->bindParam(':id', $user_id);
+		$sql->bindParam(':country', $country);
+		$sql->bindParam(':number', $number);
+		$sql->bindParam(':type', $type);
+		//execute query foreach entity
+		$sql->execute();
 	}
 
 
 //    var_dump($tt_userArray);
 //    var_dump($tt_countryArray);
 //    var_dump($tt_addressArray);
-    var_dump($tt_emailArray);
+//    var_dump($tt_emailArray);
 //    var_dump($tt_phoneArray);
 }
 import($pdoSource, $pdoTT);

@@ -31,7 +31,7 @@ function formatEntry($string){
 /**
  * @param $string date in format mm/dd/YYYY
  *
- * @return string date format YYYY/mm/dd
+* @return string date format YYYY-mm-dd
  */
 function formatDate($string){
 	$date = new DateTime($string);
