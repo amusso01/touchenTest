@@ -7,63 +7,86 @@
  *
  * @param $string
  *
- * @return string
+ * @return string / if string is empty or null return false
  */
 function formatEntry($string){
-	$string = strtolower($string);
 	$string = trim($string);
-	if (stripos($string," ")){
-		$word = explode(' ', $string);
-		foreach ($word as $key=>$value){
-			if (trim($value) === ''){
-				unset($word[$key]);
-			}else{
-				$word[$key] = ucfirst($value);
+	if (!empty($string)){
+		$string = strtolower($string);
+		if (stripos($string," ")){
+			$word = explode(' ', $string);
+			foreach ($word as $key=>$value){
+				if (trim($value) === ''){
+					unset($word[$key]);
+				}else{
+					$word[$key] = ucfirst($value);
+				}
 			}
+			$newString = implode(' ', $word);
+		}else{
+			$newString = ucfirst($string);
 		}
-		$newString = implode(' ', $word);
+		return $newString;
 	}else{
-		$newString = ucfirst($string);
+		return false;
 	}
-	return $newString;
 }
 
 /**
  * @param $string date in format mm/dd/YYYY
  *
-* @return string date format YYYY-mm-dd
+* @return string date format YYYY-mm-dd / if passed parameter is empty or null return false
  */
 function formatDate($string){
-	$date = new DateTime($string);
-	return $date->format('Y-m-d');
+	if (formatEntry($string)){
+		$date = new DateTime($string);
+		return $date->format('Y-m-d');
+	}else {
+		return false;
+	}
 }
 
-
 /**
+ * Perform operations on the ADDRESS.address in order to obtain values to input in tt_address table
+ *
  * @param $address string coming from ADDRESS.address
  *
- * @return array associative, the index array map to tt_address column name
+ * @return array associative the index is the tt_address column name
  */
 function formatAddress($address){
 	$addressLines = explode(',', $address);
-	$splitAddress['town_city'] = formatEntry(array_pop($addressLines));
-	$i=1;
-	foreach ($addressLines as $value) {
-		$splitAddress[ 'address_line_' . $i ] = formatEntry($value);
-		$i++;
+	if (count($addressLines) > 1){
+
+		$splitAddress['town_city'] = formatEntry(array_pop($addressLines));
+		$i=1;
+		if (!empty($addressLines)){
+			foreach ($addressLines as $value) {
+				$splitAddress[ 'address_line_' . $i ] = formatEntry($value);
+				$i++;
+			}
+		}else{
+			$splitAddress['address_line_1'] = false;
+		}
+		return $splitAddress;
+	}else{
+		return [false];
 	}
-	return $splitAddress;
 }
 
 /**
+ *
  * @param $number
  *
- * @return array
+ * @return array of country code and phone number respectively at index 0 and 1 // if empty or null parameter enter return false
  */
 function formatPhone($number){
-	$numberArray = explode(')',$number);
-	foreach ($numberArray as $value){
-		$phone[] = preg_replace('/(\s+)|(\()/','',$value);
+	if (formatEntry($number)){
+		$numberArray = explode(')',$number);
+		foreach ($numberArray as $value){
+			$phone[] = preg_replace('/(\s+)|(\()/','',$value);
+		}
+		return $phone;
+	}else{
+		return false;
 	}
-	return $phone;
 }

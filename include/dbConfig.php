@@ -3,11 +3,10 @@
 /**
  * Internal credential to our database (the TT database in our case)
  */
-
 $driver = 'mysql';
-$dbName = 'tt';
-$host = 'localhost';
-$user = 'root';
+$dbName = '';
+$host = '';
+$user = '';
 $pass = '';
 $charset = 'utf8mb4';
 
@@ -21,7 +20,6 @@ $options = [
 /**
  * Connection to our DB, instance name: $pdoTT
  */
-
 try {
 	$pdoTT = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
@@ -31,13 +29,12 @@ try {
 
 /**
  * Credential for the unknown source DB
- * if need different options for this connection modify $options[] array
+ * if need different options for this connection override or modify $options[] array
  */
-
 $sourceDriver = 'mysql';
-$sourceDbName = 'source';
-$sourceHost = 'localhost';
-$sourceUser = 'root';
+$sourceDbName = '';
+$sourceHost = '';
+$sourceUser = '';
 $sourcePass = '';
 $sourceCharset = 'utf8mb4';
 
@@ -47,7 +44,6 @@ $dsn = "$sourceDriver:host=$sourceHost;dbname=$sourceDbName;charset=$sourceChars
 /**
  * Connection to external source DB , instance name: $pdoSource
  */
-
 try {
 	$pdoSource = new PDO($dsn, $sourceUser, $sourcePass, $options);
 } catch (PDOException $i) {
